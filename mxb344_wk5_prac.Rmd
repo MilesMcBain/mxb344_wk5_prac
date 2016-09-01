@@ -76,6 +76,15 @@ ggplot(data=exploratory_set) +
 ### Data Splitting
 `Use caret::createDataPartition()` to create some data splits for 'training', 'validation', and 'testing'. Use a 60/20/20% ratio initially. This is a type of  **Cross Validation**. Cross validation procedures mainly guard against over fitting by evaluating models on hold-out data. 
 
+```{r}
+train_split <-
+  caret::createDataPartition(y = train$Survived, p = 0.6, list = F) 
+
+train_set <- train[train_split,]
+val_set <- train[-train_split,]
+```
+
+
 ### Model Fitting
 Fit a first pass binary glm model based on your exploratory analysis. A good one to start with would be `survival ~ pclass + gender`.
 
