@@ -78,7 +78,7 @@ ggplot(data=exploratory_set) +
 
 ```{r}
 train_split <-
-  caret::createDataPartition(y = train$Survived, p = 0.6, list = F) 
+  caret::createDataPartition(y = train$Survived, p = 0.6, list = FALSE) 
 
 train_set <- train[train_split,]
 val_set <- train[-train_split,]
@@ -86,12 +86,40 @@ val_set <- train[-train_split,]
 
 
 ### Model Fitting
+```{r}
+binom_fit1 <- glm(data=train_set,
+                  formula = Survived ~ Pclass + Sex,
+                  family=binomial(link="logit"))
+
+summary(binom_fit1)
+```
+
 Fit a first pass binary glm model based on your exploratory analysis. A good one to start with would be `survival ~ pclass + gender`.
 
 ## Model Validation
+```{r}
+plot(binom_fit1)
+```
+
 * Check the residuals and see why they're not helpful for binary models.
 
 ## Model performance 
+
+```{r}
+train_preds <- predict(binom_fit1,type = "response")
+train_preds[train_preds > 0.5] <- 1
+train_preds[train_preds <= 0.5] <- 0
+
+caret::confusionMatrix(data = train_preds, reference = train_set$Survived)
+
+
+val_preds <- predict(binom_fit1,type = "response", newdata = val_set)
+val_preds[val_preds > 0.5] <- 1
+val_preds[val_preds <= 0.5] <- 0
+
+caret::confusionMatrix(data = val_preds, reference = val_set$Survived)
+```
+
 For training and validation sets:
 * Obtain the confusion matrix for your model using `caret::confusionMatrix()`
   + How do we interpret the measures in the confusion matrix output?
