@@ -50,13 +50,26 @@ library(readr)
 library(rmarkdown)
 library(caret)
 library(ROCR)
-#train <- read_csv("../input/train.csv")
-#test  <- read_csv("../input/test.csv")
+train <- read_csv("~/data/titanic/train.csv")
+test  <- read_csv("~/data/titanic/test.csv")
 ```
 #Practical
 
 ## Exploratory Analysis
 Explore relationships using plots and summary stats.
+
+E.g:
+```{r}
+exploratory_set <-
+  train %>%
+  select(Survived, Pclass, Sex, SibSp, Parch, Fare, Embarked)
+
+ggplot(data=exploratory_set) + 
+  geom_bar(aes(x=Pclass, fill=factor(Survived)), position="dodge")
+
+ggplot(data=exploratory_set) + 
+  geom_bar(aes(x=Sex, fill=factor(Survived)), position="dodge")
+```
 
 ## Logistic Regression Model selection
 
