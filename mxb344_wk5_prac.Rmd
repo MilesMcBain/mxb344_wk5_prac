@@ -127,6 +127,16 @@ For training and validation sets:
 * Plot a ROC curve using `ROCR::predictions()` followed by `ROCR::performance()`
 How does your model perform on the test set compared to the training set? How could you improve it? Try an alternate link function.
 
+ROC Curves
+```{r}
+library(ROCR)
+val_preds_p <- predict(binom_fit1,type = "response", newdata = val_set)
+val_pred_ob <- prediction(predictions = val_preds_p, labels = val_set$Survived)
+perf <- performance(val_pred_ob, measure = "tpr", x.measure = "fpr")
+plot(perf)
+```
+
+
 ##Improving the model
 * To improve the model we manipulate the data to get more information out of it. Some things to try:
     + Create a covariate for a person's title e.g.: Mrs, Ms, Mr, Dr, etc.
