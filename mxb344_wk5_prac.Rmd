@@ -134,6 +134,8 @@ val_preds_p <- predict(binom_fit1,type = "response", newdata = val_set)
 val_pred_ob <- prediction(predictions = val_preds_p, labels = val_set$Survived)
 perf <- performance(val_pred_ob, measure = "tpr", x.measure = "fpr")
 plot(perf)
+
+val_gini = 2*(performance(val_pred_ob, measure = "auc")@y.values[[1]] - 0.5)
 ```
 
 
