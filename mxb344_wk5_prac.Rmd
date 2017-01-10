@@ -50,8 +50,8 @@ library(readr)
 library(rmarkdown)
 library(caret)
 library(ROCR)
-train <- read_csv("~/data/titanic/train.csv")
-test  <- read_csv("~/data/titanic/test.csv")
+train <- read_csv("train.csv")
+test  <- read_csv("test.csv")
 ```
 #Practical
 
@@ -77,11 +77,27 @@ ggplot(data=exploratory_set) +
 `Use caret::createDataPartition()` to create some data splits for 'training', 'validation', and 'testing'. Use a 60/20/20% ratio initially. This is a type of  **Cross Validation**. Cross validation procedures mainly guard against over fitting by evaluating models on hold-out data. 
 
 ```{r}
+#create title variable
+train <-
+  train %>%
+  separate(col = Name, into = c("LastName","Title","FirstName"), sep="[\\.,]") %>%
+  mutate(Title = trimws(Title),
+         Title = ifelse(Title %in% c("Capt","Col","Don","Dr","Jonkheer","Lady","Major","Mme","Mlle","Rev","Sir","the Countess"),
+                  yes = "Unknown", 
+                  no = Title)) %>%
+  mutate(Title = as.factor(Title)) 
+
+
+table(train$Title)
+
 train_split <-
   caret::createDataPartition(y = train$Survived, p = 0.6, list = FALSE) 
 
 train_set <- train[train_split,]
 val_set <- train[-train_split,]
+
+levels(train_set$Title)
+levels(val_set$Title)
 ```
 
 
@@ -146,16 +162,28 @@ val_gini = 2*(performance(val_pred_ob, measure = "auc")@y.values[[1]] - 0.5)
     + Devise a scheme to impute (guess) missing age values. What other data might be correlated with Age?
 * This process is called **Feature Engineering**
 
-
 ```{r}
-train_set <-
-  train_set %>%
-  separate(col = Name, into = c("LastName","FirstName"), sep = ",") %>%
-  separate(col = FirstName, into = c("Title","FirstName"), sep="\\.")
+#fit and compare
+binom_fit_title <- glm(data=train_set,
+                       family=binomial(link="logit"),
+                       formula = Survived ~ Sex + Pclass + Title)
+
+anova(binom_fit1, binom_fit_title, test="Chisq")
 ```
+
 
 ##Evaluate Improved model on test set.
 * The test set performance tells us how we expect our model to perform on the hold out data used by the Kaggle Scoring system. Evaluate your model's performance and note it for comparison with Kaggle's score.
+
+```{r}
+val_preds_title <- predict(binom_fit_title,type = "response", newdata = val_set)
+val_preds_title[val_preds_title > 0.5] <- 1
+val_preds_title[val_preds_title <= 0.5] <- 0
+
+caret::confusionMatrix(data = val_preds_title, reference = val_set$Survived)
+
+```
+
 
 ## Make a submission to Kaggle to get scored!
 https://www.kaggle.com/c/titanic/submissions/attach
