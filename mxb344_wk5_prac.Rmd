@@ -146,6 +146,14 @@ val_gini = 2*(performance(val_pred_ob, measure = "auc")@y.values[[1]] - 0.5)
     + Devise a scheme to impute (guess) missing age values. What other data might be correlated with Age?
 * This process is called **Feature Engineering**
 
+
+```{r}
+train_set <-
+  train_set %>%
+  separate(col = Name, into = c("LastName","FirstName"), sep = ",") %>%
+  separate(col = FirstName, into = c("Title","FirstName"), sep="\\.")
+```
+
 ##Evaluate Improved model on test set.
 * The test set performance tells us how we expect our model to perform on the hold out data used by the Kaggle Scoring system. Evaluate your model's performance and note it for comparison with Kaggle's score.
 
